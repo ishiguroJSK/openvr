@@ -5,7 +5,7 @@ if(PROCESSOR_ARCH MATCHES "64")
   add_definitions(-DLINUX64)
 endif()
 
-set(TARGET_NAME hellovr_opengl_my)
+set(TARGET_NAME hellovr_vulkan_my)
 
 set(THIRDPARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty)
 set(SHARED_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../shared)
@@ -14,9 +14,23 @@ set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++11 -include ${SHARED_SRC
 set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -pedantic -g")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 
-find_package(OpenGL REQUIRED)
+# find_package(OpenGL REQUIRED)
 
-find_package(GLEW 1.11 REQUIRED)
+# find_package(GLEW 1.11 REQUIRED)
+
+## Vulkan                                                                                                                                                                
+find_library(VULKAN_LIBRARY
+  NAMES
+    vulkan-1
+    vulkan
+  PATHS
+    ${THIRDPARTY_DIR}/vulkan-1.0.49.0/lib
+  PATH_SUFFIXES
+    linux64
+  NO_DEFAULT_PATH
+)
+set(VULKAN_INCLUDE_DIR ${THIRDPARTY_DIR}/vulkan-1.0.49.0/include)
+
 
 set(SDL_REQUIRED_LIBRARIES SDL2)
 foreach(lib ${SDL_REQUIRED_LIBRARIES})
@@ -53,22 +67,24 @@ file(GLOB SHARED_SRC_FILES
 
 include_directories(
   ..
-  ${OPENGL_INCLUDE_DIR}
-  ${GLEW_INCLUDE_DIR}
+  # ${OPENGL_INCLUDE_DIR}
+  # ${GLEW_INCLUDE_DIR}
   ${SDL2_INCLUDE_DIR}
   ${OPENVR_INCLUDE_DIR}
+  ${VULKAN_INCLUDE_DIR}
 )
 
 add_executable(${TARGET_NAME}
   ${SHARED_SRC_FILES}
-  hellovr_opengl_main.cpp
+  hellovr_vulkan_main.cpp
 )
 
 target_link_libraries(${TARGET_NAME}
-  ${OPENGL_LIBRARIES}
-  ${GLEW_LIBRARIES}
   ${SDL2_LIBRARIES}
+  ${VULKAN_LIBRARY}
   ${OPENVR_LIBRARIES}
   ${CMAKE_DL_LIBS}
   ${EXTRA_LIBS}
 )
+
+#setTargetOutputDirectory(${TARGET_NAME})
